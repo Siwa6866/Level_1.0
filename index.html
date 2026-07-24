@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>โปรแกรมคำนวณระดับด้วยวิธี H.I.</title>
+  <style>
+    :root{
+      --blue:#0d47a1;
+      --blue2:#1976d2;
+      --light-blue:#e3f2fd;
+      --yellow:#fff8e1;
+      --green:#2e7d32;
+      --light-green:#e8f5e9;
+      --red:#c62828;
+      --light-red:#ffebee;
+      --border:#d7e0e8;
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      padding:0;
+      font-family:Tahoma,Arial,sans-serif;
+      background:#f3f6f8;
+      color:#222;
+    }
+
+    .page{
+      width:100%;
+      max-width:1800px;
+      margin:auto;
+      padding:0 10px 20px;
+    }
+
+    .main-header{
+      background:linear-gradient(135deg,var(--blue2),var(--blue));
+      color:#fff;
+      text-align:center;
+      padding:25px 20px;
+      border-radius:0 0 14px 14px;
+      box-shadow:0 5px 16px rgba(0,0,0,.18);
+      margin-bottom:20px;
+    }
+
+    .main-header h1{
+      margin:0 0 8px;
+      font-size:32px;
+    }
+
+    .main-header p{
+      margin:4px 0;
+      font-weight:600;
+    }
+
+    .main-header hr{
+      border:0;
+      border-top:1px solid rgba(255,255,255,.45);
+      max-width:850px;
+      margin:15px auto 12px;
+    }
+
+    .developer-name{font-size:17px;font-weight:700}
+    .developer-detail{font-size:15px}
+
+    .card{
+      background:#fff;
+      padding:22px;
+      border-radius:14px;
+      box-shadow:0 3px 12px rgba(0,0,0,.10);
+    }
+
+    .top-grid{
+      display:grid;
+      grid-template-columns:42% 1fr;
+      gap:18px;
+      margin-bottom:20px;
+    }
+
+    .formula-box,
+    .instruction-box{
+      min-height:230px;
+      border-radius:9px;
+      padding:20px;
+    }
+
+    .formula-box{
+      background:var(--light-blue);
+      border-left:6px solid var(--blue2);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .formula-box p{
+      margin:10px 5px;
+      color:var(--blue);
+      font-size:19px;
+      font-weight:700;
+    }
+
+    .instruction-box{
+      background:var(--yellow);
+      border-left:6px solid #ffb300;
+    }
+
+    .instruction-box p{margin:0 0 9px}
+
+    .editable-note{
+      color:#1565c0;
+      font-weight:700;
+      margin-bottom:12px;
+    }
+
+    .table-wrap{
+      overflow-x:auto;
+      width:100%;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      background:#fff;
+    }
+
+    th{
+      background:#dceefa;
+      color:#064b9b;
+      border:1px solid #b7c9d8;
+      padding:14px 5px;
+      text-align:center;
+      white-space:nowrap;
+    }
+
+    td{
+      border:1px solid #ddd;
+      padding:11px 5px;
+      text-align:center;
+      white-space:nowrap;
+      font-size:15px;
+    }
+
+    tbody tr:nth-child(even){background:#f7f7f7}
+    tbody tr.selected{background:#fff3cd}
+
+    td[contenteditable="true"]{
+      cursor:text;
+      background:#fffdf4;
+    }
+
+    td[contenteditable="true"]:focus{
+      outline:2px solid var(--blue2);
+      outline-offset:-2px;
+      background:#fff;
+    }
+
+    .button-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:18px;
+    }
+
+    button,.download-link{
+      border:0;
+      border-radius:5px;
+      padding:10px 14px;
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:inherit;
+    }
+
+    .btn-blue{background:#245b8f}
+    .btn-green{background:#4caf50}
+    .btn-red{background:#d9534f}
+    .btn-cyan{background:#45b7d1}
+    .btn-orange{background:#f0ad4e}
+    .btn-darkgreen{background:#2e8b57}
+
+    .sum-box{
+      margin-top:17px;
+      max-width:760px;
+    }
+
+    .sum-title{
+      color:var(--blue);
+      font-size:17px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .summary-box{
+      background:var(--light-green);
+      border-left:7px solid var(--green);
+      padding:18px;
+      border-radius:10px;
+      margin-top:18px;
+    }
+
+    .summary-box p{margin:0 0 8px}
+
+    .warning-box{
+      background:var(--light-red);
+      border-left:7px solid var(--red);
+      padding:16px;
+      border-radius:9px;
+      margin-top:18px;
+      display:none;
+    }
+
+    .plot-panel{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:18px;
+      margin-top:22px;
+      box-shadow:0 2px 8px rgba(0,0,0,.07);
+    }
+
+    .plot-panel h3{
+      color:var(--blue);
+      text-align:center;
+      margin:0 0 8px;
+    }
+
+    .plot-note{
+      text-align:center;
+      color:#666;
+      margin-bottom:10px;
+    }
+
+    canvas{
+      width:100%;
+      height:460px;
+      border:1px solid #eee;
+      border-radius:8px;
+      background:#fff;
+    }
+
+    @media(max-width:900px){
+      .top-grid{grid-template-columns:1fr}
+      .main-header h1{font-size:25px}
+      .card{padding:10px}
+      th,td{font-size:13px;padding:9px 3px}
+      canvas{height:360px}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header class="main-header">
+      <h1>โปรแกรมคำนวณระดับด้วยวิธี H.I.</h1>
+      <p>กรอกและแก้ไขข้อมูลในตารางได้โดยตรง</p>
+      <p>โปรแกรมคำนวณ H.I., Elevation และค่าต่างระดับเป็นทศนิยม 3 ตำแหน่ง</p>
+      <hr>
+      <p class="developer-name">ผู้พัฒนา ผศ.ดร.ศิวา แก้วปลั่ง</p>
+      <p class="developer-detail">พัฒนาเมื่อวันที่ 25 กรกฎาคม 2569</p>
+      <p class="developer-detail">สำหรับใช้ในการเรียน การสอน คณะวิศวกรรมศาสตร์ มหาวิทยาลัยมหาสารคาม</p>
+    </header>
+
+    <main class="card">
+      <section class="top-grid">
+        <div class="formula-box">
+          <p>H.I. = Elevation<sub>Reference</sub> + BS</p>
+          <p>Elevation<sub>Next</sub> = H.I. - FS</p>
+          <p>ΔH = Elevation<sub>Current</sub> - Elevation<sub>Previous</sub></p>
+        </div>
+
+        <div class="instruction-box">
+          <p><strong>วิธีกรอกข้อมูล</strong></p>
+          <p>1. คลิกช่อง Sta, BS, FS หรือ Elevation เพื่อแก้ไขข้อมูล</p>
+          <p>2. แถวแรกกรอก Sta, BS และ Elevation เริ่มต้น</p>
+          <p>3. แถวถัดไปกรอก Sta และ FS</p>
+          <p>4. จุดเปลี่ยนกล้องกรอกทั้ง FS และ BS ในแถวเดียวกัน</p>
+          <p>5. Elevation แถวที่ 2 เป็นต้นไปคำนวณอัตโนมัติจาก H.I. - FS</p>
+          <p>6. หลังกรอกค่าให้กด Enter เพื่อบันทึกและไปยังช่องถัดไป</p>
+        </div>
+      </section>
+
+      <div class="editable-note">
+        คลิกช่อง Sta, BS, FS หรือ Elevation แถวแรก แล้วพิมพ์ค่า จากนั้นกด Enter เพื่อไปช่องถัดไป
+      </div>
+
+      <div class="table-wrap">
+        <table id="levelTable">
+          <thead>
+            <tr>
+              <th style="width:8%">ลำดับ</th>
+              <th style="width:17%">Sta</th>
+              <th style="width:13%">BS (m)</th>
+              <th style="width:14%">H.I. (m)</th>
+              <th style="width:13%">FS (m)</th>
+              <th style="width:17%">Elevation (m)</th>
+              <th style="width:18%">ค่าต่างระดับ (m)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="sum-box">
+        <div class="sum-title">ตารางสรุปผลรวม BS และ FS</div>
+        <table>
+          <thead>
+            <tr>
+              <th>ผลรวม BS (m)</th>
+              <th>ผลรวม FS (m)</th>
+              <th>ผลรวม BS - FS (m)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="sumBS">0.000</td>
+              <td id="sumFS">0.000</td>
+              <td id="sumDiff">0.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="button-row">
+        <button class="btn-blue" id="calcBtn">▣ คำนวณ</button>
+        <button class="btn-green" id="addBtn">＋ เพิ่มแถว</button>
+        <button class="btn-red" id="deleteBtn">🗑 ลบแถวที่เลือก</button>
+        <button class="btn-cyan" id="exampleBtn">▤ ข้อมูลตัวอย่าง</button>
+        <button class="btn-orange" id="clearBtn">↶ ล้างข้อมูล</button>
+        <button class="btn-darkgreen" id="downloadBtn">⬇ ดาวน์โหลด CSV</button>
+      </div>
+
+      <div class="warning-box" id="warningBox"></div>
+
+      <div class="summary-box" id="summaryBox"></div>
+
+      <section class="plot-panel">
+        <h3>กราฟแสดงค่าระดับของแต่ละจุด</h3>
+        <div class="plot-note">ตัวเลขเหนือจุดคือค่าระดับ และตัวเลขระหว่างจุดคือค่าต่างระดับ</div>
+        <canvas id="elevationCanvas"></canvas>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    let rows = [];
+    let selectedRow = null;
+
+    const exampleRows = () => ([
+      {station:"BM1", bs:1.250, fs:null, elevation:100.000},
+      {station:"TP1", bs:1.315, fs:1.252, elevation:null},
+      {station:"TP2", bs:1.425, fs:1.325, elevation:null},
+      {station:"BM2", bs:null, fs:1.410, elevation:null}
+    ]);
+
+    function parseNumber(value){
+      const text = String(value ?? "").trim().replace(/,/g,"");
+      if(text === "") return null;
+      const num = Number(text);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function fmt(value){
+      return value === null || !Number.isFinite(value) ? "" : value.toFixed(3);
+    }
+
+    function calculate(){
+      let activeHI = null;
+      let previousElevation = null;
+
+      rows = rows.map((row,index) => {
+        const bs = parseNumber(row.bs);
+        const fs = parseNumber(row.fs);
+        let elevation = null;
+        let hi = null;
+        let difference = null;
+
+        if(index === 0){
+          elevation = parseNumber(row.elevation);
+        }else if(activeHI !== null && fs !== null){
+          elevation = activeHI - fs;
+        }
+
+        if(elevation !== null && previousElevation !== null){
+          difference = elevation - previousElevation;
+        }
+
+        if(elevation !== null && bs !== null){
+          hi = elevation + bs;
+          activeHI = hi;
+        }
+
+        if(elevation !== null){
+          previousElevation = elevation;
+        }
+
+        return {
+          station:String(row.station ?? ""),
+          bs,
+          fs,
+          elevation,
+          hi,
+          difference
+        };
+      });
+
+      renderAll();
+    }
+
+    function renderTable(){
+      const tbody = document.querySelector("#levelTable tbody");
+      tbody.innerHTML = "";
+
+      rows.forEach((row,index) => {
+        const tr = document.createElement("tr");
+        if(index === selectedRow) tr.classList.add("selected");
+
+        const cells = [
+          {value:index+1, editable:false, key:"order"},
+          {value:row.station, editable:true, key:"station"},
+          {value:fmt(row.bs), editable:true, key:"bs"},
+          {value:fmt(row.hi), editable:false, key:"hi"},
+          {value:fmt(row.fs), editable:true, key:"fs"},
+          {value:fmt(row.elevation), editable:index===0, key:"elevation"},
+          {value:fmt(row.difference), editable:false, key:"difference"}
+        ];
+
+        cells.forEach((cell,colIndex) => {
+          const td = document.createElement("td");
+          td.textContent = cell.value;
+          td.dataset.row = index;
+          td.dataset.col = colIndex;
+          td.dataset.key = cell.key;
+
+          if(cell.editable){
+            td.contentEditable = "true";
+            td.spellcheck = false;
+
+            td.addEventListener("mousedown", (event) => {
+              event.stopPropagation();
+            });
+
+            td.addEventListener("click", (event) => {
+              event.stopPropagation();
+              selectedRow = index;
+
+              document
+                .querySelectorAll("#levelTable tbody tr")
+                .forEach(rowElement => {
+                  rowElement.classList.remove("selected");
+                });
+
+              tr.classList.add("selected");
+            });
+
+            td.addEventListener("focus", () => {
+              const range = document.createRange();
+              range.selectNodeContents(td);
+              const sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+            });
+
+            td.addEventListener("blur", () => {
+              saveCell(td);
+            });
+
+            td.addEventListener("keydown", (event) => {
+              if(event.key === "Enter"){
+                event.preventDefault();
+                saveCell(td);
+                moveNext(index,colIndex);
+              }
+            });
+          }
+
+          tr.appendChild(td);
+        });
+
+        tr.addEventListener("click", (event) => {
+          selectedRow = index;
+
+          document
+            .querySelectorAll("#levelTable tbody tr")
+            .forEach(rowElement => {
+              rowElement.classList.remove("selected");
+            });
+
+          tr.classList.add("selected");
+
+          /*
+            ไม่เรียก renderTable() ตอนคลิกแถว
+            เพราะจะทำลายเซลล์ที่กำลังแก้ไข
+          */
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveCell(td){
+      const rowIndex = Number(td.dataset.row);
+      const key = td.dataset.key;
+      const value = td.textContent.trim();
+
+      if(!rows[rowIndex]) return;
+
+      if(key === "station"){
+        rows[rowIndex].station = value;
+      }else if(key === "bs"){
+        rows[rowIndex].bs = parseNumber(value);
+      }else if(key === "fs"){
+        rows[rowIndex].fs = parseNumber(value);
+      }else if(key === "elevation" && rowIndex === 0){
+        rows[rowIndex].elevation = parseNumber(value);
+      }
+
+      calculate();
+    }
+
+    function nextEditablePosition(rowIndex,colIndex){
+      if(rowIndex === 0){
+        if(colIndex === 1) return [0,2];
+        if(colIndex === 2) return [0,5];
+        if(colIndex === 5) return [1,1];
+      }else{
+        if(colIndex === 1) return [rowIndex,2];
+        if(colIndex === 2) return [rowIndex,4];
+        if(colIndex === 4) return [rowIndex+1,1];
+      }
+      return null;
+    }
+
+    function moveNext(rowIndex,colIndex){
+      const next = nextEditablePosition(rowIndex,colIndex);
+      if(!next) return;
+      const [nextRow,nextCol] = next;
+      if(nextRow >= rows.length) return;
+
+      setTimeout(() => {
+        const cell = document.querySelector(
+          `#levelTable td[data-row="${nextRow}"][data-col="${nextCol}"]`
+        );
+        if(cell){
+          cell.focus();
+        }
+      },80);
+    }
+
+    function renderSummary(){
+      const valid = rows.filter(r => r.elevation !== null);
+      const sumBS = rows.reduce((s,r) => s + (r.bs ?? 0),0);
+      const sumFS = rows.reduce((s,r) => s + (r.fs ?? 0),0);
+
+      document.getElementById("sumBS").textContent = fmt(sumBS);
+      document.getElementById("sumFS").textContent = fmt(sumFS);
+      document.getElementById("sumDiff").textContent = fmt(sumBS-sumFS);
+
+      const warningBox = document.getElementById("warningBox");
+      const warnings = [];
+
+      if(rows.length === 0 || rows[0].elevation === null){
+        warnings.push("แถวที่ 1 ต้องกรอก Elevation เริ่มต้น");
+      }
+      if(rows.length === 0 || rows[0].bs === null){
+        warnings.push("แถวที่ 1 ต้องกรอกค่า BS");
+      }
+
+      rows.forEach((r,i) => {
+        if(i > 0 && (r.station || r.bs !== null || r.fs !== null) && r.fs === null){
+          warnings.push(`แถวที่ ${i+1} ยังไม่มีค่า FS`);
+        }
+      });
+
+      if(warnings.length){
+        warningBox.style.display = "block";
+        warningBox.innerHTML = "<strong>กรุณาตรวจสอบข้อมูล</strong><br>" +
+          warnings.map(x => "• " + x).join("<br>");
+      }else{
+        warningBox.style.display = "none";
+        warningBox.innerHTML = "";
+      }
+
+      const summaryBox = document.getElementById("summaryBox");
+      if(valid.length === 0){
+        summaryBox.innerHTML = "ยังไม่มีข้อมูลค่าระดับ";
+        return;
+      }
+
+      const first = valid[0];
+      const last = valid[valid.length-1];
+      const elevationDiff = last.elevation - first.elevation;
+
+      summaryBox.innerHTML = `
+        <p><strong>จุดเริ่มต้น:</strong> ${first.station || "แถวที่ 1"}</p>
+        <p><strong>ค่าระดับจุดเริ่มต้น:</strong> ${fmt(first.elevation)} เมตร</p>
+        <p><strong>จุดสุดท้าย:</strong> ${last.station || "-"}</p>
+        <p><strong>ค่าระดับจุดสุดท้าย:</strong> ${fmt(last.elevation)} เมตร</p>
+        <p><strong>ผลรวม BS:</strong> ${fmt(sumBS)} เมตร</p>
+        <p><strong>ผลรวม FS:</strong> ${fmt(sumFS)} เมตร</p>
+        <p><strong>ผลรวม BS - ผลรวม FS:</strong> ${fmt(sumBS-sumFS)} เมตร</p>
+        <p><strong>Elevation จุดสุดท้าย - Elevation จุดเริ่มต้น:</strong> ${fmt(elevationDiff)} เมตร</p>
+      `;
+    }
+
+    function drawPlot(){
+      const canvas = document.getElementById("elevationCanvas");
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(900, rect.width*dpr);
+      canvas.height = 460*dpr;
+
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr,dpr);
+
+      const width = canvas.width/dpr;
+      const height = canvas.height/dpr;
+
+      ctx.clearRect(0,0,width,height);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0,0,width,height);
+
+      const valid = rows
+        .map((r,i)=>({...r,index:i}))
+        .filter(r=>r.elevation !== null);
+
+      if(valid.length === 0){
+        ctx.fillStyle = "#666";
+        ctx.font = "16px Tahoma";
+        ctx.textAlign = "center";
+        ctx.fillText("ยังไม่มีข้อมูลค่าระดับสำหรับวาดกราฟ",width/2,height/2);
+        return;
+      }
+
+      const margin = {left:80,right:40,top:55,bottom:70};
+      const plotW = width-margin.left-margin.right;
+      const plotH = height-margin.top-margin.bottom;
+
+      let minY = Math.min(...valid.map(r=>r.elevation));
+      let maxY = Math.max(...valid.map(r=>r.elevation));
+      if(minY === maxY){ minY -= .5; maxY += .5; }
+      const pad = Math.max((maxY-minY)*.35,.1);
+      minY -= pad;
+      maxY += pad;
+
+      const x = i => valid.length===1
+        ? margin.left+plotW/2
+        : margin.left + i*(plotW/(valid.length-1));
+
+      const y = val => margin.top + (maxY-val)/(maxY-minY)*plotH;
+
+      ctx.strokeStyle="#ddd";
+      ctx.lineWidth=1;
+      ctx.setLineDash([5,5]);
+      for(let i=0;i<=5;i++){
+        const yy=margin.top+i*(plotH/5);
+        ctx.beginPath();
+        ctx.moveTo(margin.left,yy);
+        ctx.lineTo(width-margin.right,yy);
+        ctx.stroke();
+
+        const val=maxY-i*((maxY-minY)/5);
+        ctx.fillStyle="#444";
+        ctx.font="13px Tahoma";
+        ctx.textAlign="right";
+        ctx.fillText(val.toFixed(3),margin.left-10,yy+4);
+      }
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle="#222";
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(margin.left,margin.top);
+      ctx.lineTo(margin.left,height-margin.bottom);
+      ctx.lineTo(width-margin.right,height-margin.bottom);
+      ctx.stroke();
+
+      ctx.strokeStyle="#1976d2";
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      valid.forEach((r,i)=>{
+        const xx=x(i), yy=y(r.elevation);
+        if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+      });
+      ctx.stroke();
+
+      valid.forEach((r,i)=>{
+        const xx=x(i), yy=y(r.elevation);
+        ctx.fillStyle="#0d47a1";
+        ctx.beginPath();
+        ctx.arc(xx,yy,5,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.fillStyle="#111";
+        ctx.font="bold 13px Tahoma";
+        ctx.textAlign="center";
+        ctx.fillText(`${r.elevation.toFixed(3)} m`,xx,yy-14);
+
+        ctx.font="13px Tahoma";
+        ctx.fillText(r.station || `Point ${r.index+1}`,xx,height-margin.bottom+28);
+
+        if(i>0 && r.difference !== null){
+          const prev=valid[i-1];
+          const midX=(x(i-1)+xx)/2;
+          const midY=(y(prev.elevation)+yy)/2;
+          ctx.fillStyle="#444";
+          ctx.font="13px Tahoma";
+          const sign=r.difference>0?"+":"";
+          ctx.fillText(`${sign}${r.difference.toFixed(3)} m`,midX,midY+20);
+        }
+      });
+
+      ctx.save();
+      ctx.translate(22,height/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillStyle="#111";
+      ctx.font="14px Tahoma";
+      ctx.textAlign="center";
+      ctx.fillText("Elevation (m)",0,0);
+      ctx.restore();
+
+      ctx.fillStyle="#111";
+      ctx.font="14px Tahoma";
+      ctx.textAlign="center";
+      ctx.fillText("Station",margin.left+plotW/2,height-18);
+    }
+
+    function renderAll(){
+      renderTable();
+      renderSummary();
+      drawPlot();
+    }
+
+    function addRow(){
+      rows.push({station:"",bs:null,fs:null,elevation:null,hi:null,difference:null});
+      selectedRow = rows.length-1;
+      calculate();
+      setTimeout(()=>{
+        const cell=document.querySelector(
+          `#levelTable td[data-row="${rows.length-1}"][data-col="1"]`
+        );
+        if(cell) cell.focus();
+      },80);
+    }
+
+    function deleteSelected(){
+      if(selectedRow === null){
+        alert("กรุณาคลิกเลือกแถวที่ต้องการลบ");
+        return;
+      }
+      if(rows.length <= 1){
+        alert("ต้องมีข้อมูลอย่างน้อย 1 แถว");
+        return;
+      }
+
+      rows.splice(selectedRow,1);
+      selectedRow = null;
+
+      if(rows[0] && rows[0].elevation === null){
+        rows[0].elevation = 0;
+      }
+
+      calculate();
+    }
+
+    function clearData(){
+      rows = Array.from({length:5},()=>({
+        station:"",bs:null,fs:null,elevation:null,hi:null,difference:null
+      }));
+      selectedRow = null;
+      renderAll();
+    }
+
+    function downloadCSV(){
+      calculate();
+
+      const activeRows = rows.filter(r =>
+        r.station || r.bs !== null || r.fs !== null || r.elevation !== null
+      );
+
+      const header = [
+        "Order","Station","BS_m","HI_m","FS_m","Elevation_m","Difference_Elevation_m"
+      ];
+
+      const lines = [header.join(",")];
+
+      activeRows.forEach((r,i)=>{
+        const escapeCSV = value => {
+          const text = String(value ?? "");
+          return /[",\n]/.test(text) ? `"${text.replace(/"/g,'""')}"` : text;
+        };
+
+        lines.push([
+          i+1,
+          escapeCSV(r.station),
+          fmt(r.bs),
+          fmt(r.hi),
+          fmt(r.fs),
+          fmt(r.elevation),
+          fmt(r.difference)
+        ].join(","));
+      });
+
+      const bom = "\uFEFF";
+      const blob = new Blob([bom + lines.join("\n")],{type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `HI_leveling_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("calcBtn").addEventListener("click",calculate);
+    document.getElementById("addBtn").addEventListener("click",addRow);
+    document.getElementById("deleteBtn").addEventListener("click",deleteSelected);
+    document.getElementById("exampleBtn").addEventListener("click",()=>{
+      rows=exampleRows();
+      selectedRow=null;
+      calculate();
+    });
+    document.getElementById("clearBtn").addEventListener("click",clearData);
+    document.getElementById("downloadBtn").addEventListener("click",downloadCSV);
+    window.addEventListener("resize",drawPlot);
+
+    rows = exampleRows();
+    calculate();
+  </script>
+</body>
+</html>
